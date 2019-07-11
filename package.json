@@ -1,6 +1,6 @@
 {
   "name": "vue-stomp-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "a websocket plugin for web app",
   "main": "lib/index",
   "scripts": {
