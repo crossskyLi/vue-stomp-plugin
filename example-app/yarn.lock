@@ -6262,6 +6262,14 @@ vue-property-decorator@^8.1.0:
     vue "^2.6.10"
     vue-class-component "^7.0.1"
 
+vue-stomp-plugin@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/vue-stomp-plugin/-/vue-stomp-plugin-0.0.3.tgz#47ff612aabe1a329eb472aac569e9f2dda846a5c"
+  dependencies:
+    "@stomp/stompjs" "^5.4.2"
+    sockjs-client "^1.3.0"
+    vue "^2.6.10"
+
 vue-style-loader@^4.1.0:
   version "4.1.2"
   resolved "https://registry.npmjs.org/vue-style-loader/-/vue-style-loader-4.1.2.tgz#dedf349806f25ceb4e64f3ad7c0a44fba735fcf8"

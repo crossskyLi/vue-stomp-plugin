@@ -1,4 +1,4 @@
-import { factory as SocketFactory } from "./socketPlugin/index";
+import { factory as SocketFactory } from "vue-stomp-plugin";
 
 const ip = "10.9.96.148";
 const localIp = "127.0.0.1";

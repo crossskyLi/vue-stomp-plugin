@@ -6,6 +6,9 @@ npm i vue-stomp-plugin @stomp/stompjs sockjs-client
 yarn add @stomp/stompjs sockjs-client vue-stomp-plugin
 
 
+### a nodejs client to mock
+if you need a nodejs client to mock , you can go to ([nodejs repo'](https://github.com/crossskyLi/node-socket-demo))
+
 ### use as a factory
 ```JavaScript
 import { factory as SocketFactory } from "vue-stomp-plugin";
@@ -47,8 +50,6 @@ export const options = {
 }
 
 export const client = SocketFactory(options);
-
-
 
 ```
 
