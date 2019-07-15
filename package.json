@@ -17,7 +17,7 @@
     "stomp",
     "vue"
   ],
-  "author": "liguanliang",
+  "author": "crossskyLi",
   "license": "ISC",
   "dependencies": {
     "@stomp/stompjs": "^5.4.2",
