@@ -30,7 +30,8 @@ export const options = {
   requestBody,
   subscribeMap: {
     alarms: {
-      topic: "alarm",
+      // topic: "alarm",
+      topic: ["alarm","alarm2"],
       subCallback: noop,
       unsubCallback: noop,
     },

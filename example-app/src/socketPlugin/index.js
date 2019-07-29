@@ -64,7 +64,7 @@
       socketCaller.prototype.onopen = function () {
           var _this = this;
           var _a = this.option, tokenObj = _a.tokenObj, requestBody = _a.requestBody;
-          var destinationKey = this.getOption('destinationKey');
+          var destinationKey = this.getOption("destinationKey");
           var destination = this.option[destinationKey];
           this.client.ws.onopen = function () {
               _this.send(destination, { tokenObj: tokenObj, requestBody: requestBody });
@@ -85,7 +85,7 @@
           this.client.ws.onmessage = function (event) {
               var resData = JSON.parse(event.data);
               var responseData = resData;
-              var topicKey = _this.getOption('topicKey');
+              var topicKey = _this.getOption("topicKey");
               try {
                   if (resData[topicKey]) {
                       responseData[topicKey] = resData[topicKey];
@@ -104,35 +104,52 @@
               // responseData.topic = "alarm"
               var topic = responseData[topicKey];
               if (_this.subscribeTopicMap[topic]) {
-                  _this.subscribeTopicMap[topic].forEach(function (m) { m.callback(responseData); });
+                  _this.subscribeTopicMap[topic].forEach(function (m) {
+                      m.callback(responseData);
+                  });
               }
           };
       };
       socketCaller.prototype.subscribe = function (topic, vm, callback, hookName, requestBody) {
-          var _a;
           var _this = this;
           if (hookName === void 0) { hookName = "$destroy"; }
           if (requestBody === void 0) { requestBody = {}; }
           if (!topic) {
-              throw new Error('topic is required');
+              throw new Error("topic is required");
           }
-          var idKey = this.getOption('idKey');
+          var idKey = this.getOption("idKey");
           if (!vm[idKey]) {
-              throw new Error('id is required');
+              throw new Error("id is required");
           }
-          this.subscribeTopicMap[topic] = this.subscribeTopicMap[topic] || [];
-          this.subscribeTopicMap[topic].push((_a = { instance: vm }, _a[idKey] = vm[idKey], _a.callback = callback, _a));
-          var funchook = function () {
-              console.info("hook vm _uid " + vm[idKey] + " " + hookName + " to unsubscribe");
-              return _this.unsubscribe(topic, vm);
+          var sub = function (topic) {
+              var _a;
+              _this.subscribeTopicMap[topic] = _this.subscribeTopicMap[topic] || [];
+              _this.subscribeTopicMap[topic].push((_a = {
+                      instance: vm
+                  },
+                  _a[idKey] = vm[idKey],
+                  _a.callback = callback,
+                  _a));
+              var funchook = function () {
+                  console.info("hook vm _uid " + vm[idKey] + " " + hookName + " to unsubscribe");
+                  return _this.unsubscribe(topic, vm);
+              };
+              if (vm[hookName] && typeof vm[hookName] === "function") {
+                  hook(vm, hookName, funchook);
+              }
           };
-          if (vm[hookName] && typeof vm[hookName] === "function") {
-              hook(vm, hookName, funchook);
+          if (Array.isArray(topic)) {
+              topic.forEach(function (t) {
+                  sub(t);
+              });
           }
-          var destinationKey = this.getOption('destinationKey');
+          else {
+              sub(topic);
+          }
+          var destinationKey = this.getOption("destinationKey");
           var destination = this.option[destinationKey];
-          var tokenObj = this.getOption('tokenObj');
-          var topicKey = this.getOption('topicKey');
+          var tokenObj = this.getOption("tokenObj");
+          var topicKey = this.getOption("topicKey");
           requestBody[topicKey] = topic;
           var reqBody = { tokenObj: tokenObj, requestBody: requestBody };
           this.send(destination, reqBody);
@@ -143,13 +160,13 @@
           if (!this.subscribeTopicMap[topic]) {
               throw new Error("the " + topic + " Topic is missed OR Client is destroy, please check the Topic OR the Client is existed");
           }
-          var idKey = this.getOption('idKey');
-          var tokenObj = this.getOption('tokenObj');
-          var unsubdestinationKey = this.getOption('unsubdestinationKey');
+          var idKey = this.getOption("idKey");
+          var tokenObj = this.getOption("tokenObj");
+          var unsubdestinationKey = this.getOption("unsubdestinationKey");
           var unsubdestination = this.option[unsubdestinationKey];
           this.subscribeTopicMap[topic] = this.subscribeTopicMap[topic].filter(function (_) {
               if (_[idKey] === vm[idKey]) {
-                  var topicKey = _this.getOption('topicKey');
+                  var topicKey = _this.getOption("topicKey");
                   requestBody[topicKey] = topic;
                   var opts = { tokenObj: tokenObj, requestBody: requestBody };
                   _this.send(unsubdestination, opts);
@@ -166,11 +183,11 @@
           var _this = this;
           if (requestBody === void 0) { requestBody = {}; }
           var tokenObj = this.option.tokenObj;
-          var unsubdestinationKey = this.getOption('unsubdestinationKey');
+          var unsubdestinationKey = this.getOption("unsubdestinationKey");
           var unsubdestination = this.option[unsubdestinationKey];
           var topics = [];
           Object.keys(this.subscribeTopicMap).forEach(function (topic) {
-              var topicKey = _this.getOption('topicKey');
+              var topicKey = _this.getOption("topicKey");
               requestBody[topicKey] = topic;
               var opts = { tokenObj: tokenObj, requestBody: requestBody };
               topics.push(topic);

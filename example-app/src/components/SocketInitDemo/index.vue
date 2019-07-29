@@ -36,7 +36,8 @@ export default class SocketDemo extends Vue {
   }
 
   subscribe() {
-    const topic = "alarm";
+    // const topic = "alarm";
+    const topic = ["alarm", "alarms2"];
     const vm = this;
     const callback = this.subscribeCallback;
     const hookName = "$destroy";
