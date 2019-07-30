@@ -3,11 +3,11 @@
     <h1>{{ msg }}</h1>
     <button @click="init">init</button>
     <button @click="activate">activate</button>
+    <button @click="handleDeactivate">deactivate</button>
     <button @click="subscribe">subscribe</button>
     <button @click="unsubscribe">unsubscribe</button>
     <button @click="unsubscribeAll">unsubscribeAll</button>
     <button @click="destroy">destroy</button>
-    <button @click="handleActivate">activate</button>
     <!-- <button @click="handleUnsubscribeByMap">unsubscribeByMap</button> -->
   </div>
 </template>
@@ -32,6 +32,7 @@ export default class SocketDemo extends Vue {
   }
 
   activate() {
+    debugger;
     client.activate();
   }
 
@@ -65,7 +66,8 @@ export default class SocketDemo extends Vue {
   }
 
   unsubscribe() {
-    const topic = "alarm";
+    // const topic = "alarm";
+    const topic = ["alarm", "alarms2"];
     const requestBody = {
       msg: "我不要订阅了"
     };
@@ -126,8 +128,13 @@ export default class SocketDemo extends Vue {
   destroy() {
     client.destroy();
   }
-  handleActivate() {
-    client.activate();
+
+  beforeDestroy() {
+    client && client.destroy();
+  }
+
+  handleDeactivate() {
+    client.deactivate();
   }
 }
 </script>

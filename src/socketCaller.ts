@@ -150,24 +150,36 @@ class socketCaller {
   }
 
   unsubscribe(topic, vm, requestBody = {}, callback?) {
-    if (!this.subscribeTopicMap[topic]) {
-      throw new Error(
-        `the ${topic} Topic is missed OR Client is destroy, please check the Topic OR the Client is existed`
-      );
-    }
     const idKey = this.getOption("idKey");
     const tokenObj = this.getOption("tokenObj");
     const unsubdestinationKey = this.getOption("unsubdestinationKey");
     const unsubdestination = this.option[unsubdestinationKey];
-    this.subscribeTopicMap[topic] = this.subscribeTopicMap[topic].filter(_ => {
-      if (_[idKey] === vm[idKey]) {
-        const topicKey = this.getOption("topicKey");
-        requestBody[topicKey] = topic;
-        const opts = { tokenObj, requestBody };
-        this.send(unsubdestination, opts);
+    const unsub = unsubtopic => {
+      this.subscribeTopicMap[unsubtopic] = this.subscribeTopicMap[unsubtopic].filter(
+        _ => {
+          if (_[idKey] === vm[idKey]) {
+            const topicKey = this.getOption("topicKey");
+            requestBody[topicKey] = unsubtopic;
+            const opts = { tokenObj, requestBody };
+            this.send(unsubdestination, opts);
+          }
+          return _[idKey] !== vm[idKey];
+        }
+      );
+    };
+
+    if (Array.isArray(topic)) {
+      topic.forEach(unsub);
+    }
+
+    if (typeof topic === "string") {
+      if (!this.subscribeTopicMap[topic]) {
+        throw new Error(
+          `the ${topic} Topic is missed OR Client is destroy, please check the Topic OR the Client is existed`
+        );
       }
-      return _[idKey] !== vm[idKey];
-    });
+      unsub(topic);
+    }
 
     if (callback) callback(topic);
   }
@@ -206,12 +218,21 @@ class socketCaller {
   }
 
   activate() {
+    debugger;
+    if (this.client.active === true) {
+      console.info("Client is already activated");
+      return;
+    }
     this.client.activate();
+  }
+  deactivate() {
+    this.client && this.client.deactivate();
   }
 
   destroy(requestBody = {}) {
     this.unsubscribeAll(requestBody);
-    this.client.deactivate();
+    this.deactivate();
+    this.client = null;
   }
 }
 export default socketCaller;

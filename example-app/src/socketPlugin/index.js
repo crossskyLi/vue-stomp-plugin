@@ -157,22 +157,30 @@
       socketCaller.prototype.unsubscribe = function (topic, vm, requestBody, callback) {
           var _this = this;
           if (requestBody === void 0) { requestBody = {}; }
-          if (!this.subscribeTopicMap[topic]) {
-              throw new Error("the " + topic + " Topic is missed OR Client is destroy, please check the Topic OR the Client is existed");
-          }
           var idKey = this.getOption("idKey");
           var tokenObj = this.getOption("tokenObj");
           var unsubdestinationKey = this.getOption("unsubdestinationKey");
           var unsubdestination = this.option[unsubdestinationKey];
-          this.subscribeTopicMap[topic] = this.subscribeTopicMap[topic].filter(function (_) {
-              if (_[idKey] === vm[idKey]) {
-                  var topicKey = _this.getOption("topicKey");
-                  requestBody[topicKey] = topic;
-                  var opts = { tokenObj: tokenObj, requestBody: requestBody };
-                  _this.send(unsubdestination, opts);
+          var unsub = function (unsubtopic) {
+              _this.subscribeTopicMap[unsubtopic] = _this.subscribeTopicMap[unsubtopic].filter(function (_) {
+                  if (_[idKey] === vm[idKey]) {
+                      var topicKey = _this.getOption("topicKey");
+                      requestBody[topicKey] = unsubtopic;
+                      var opts = { tokenObj: tokenObj, requestBody: requestBody };
+                      _this.send(unsubdestination, opts);
+                  }
+                  return _[idKey] !== vm[idKey];
+              });
+          };
+          if (Array.isArray(topic)) {
+              topic.forEach(unsub);
+          }
+          if (typeof topic === "string") {
+              if (!this.subscribeTopicMap[topic]) {
+                  throw new Error("the " + topic + " Topic is missed OR Client is destroy, please check the Topic OR the Client is existed");
               }
-              return _[idKey] !== vm[idKey];
-          });
+              unsub(topic);
+          }
           if (callback)
               callback(topic);
       };
@@ -205,12 +213,21 @@
           }
       };
       socketCaller.prototype.activate = function () {
+          debugger;
+          if (this.client.active === true) {
+              console.info("Client is already activated");
+              return;
+          }
           this.client.activate();
+      };
+      socketCaller.prototype.deactivate = function () {
+          this.client && this.client.deactivate();
       };
       socketCaller.prototype.destroy = function (requestBody) {
           if (requestBody === void 0) { requestBody = {}; }
           this.unsubscribeAll(requestBody);
-          this.client.deactivate();
+          this.deactivate();
+          this.client = null;
       };
       return socketCaller;
   }());
