@@ -17,6 +17,7 @@ class socketCaller {
   subscribeTopicMap = {};
   client = null;
   destination: string = "subscribe";
+  clientStatus: boolean = false;
 
   constructor(option) {
     this.option = option;
@@ -56,9 +57,18 @@ class socketCaller {
     const destination = this.option[destinationKey];
 
     this.client.ws.onopen = () => {
+      this.clientStatus = true;
       this.send(destination, { tokenObj, requestBody });
       this.onmessage();
     };
+  }
+
+  getClientStatus() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(this.clientStatus);
+      }, 100);
+    });
   }
 
   send(destination, opts) {
@@ -155,17 +165,17 @@ class socketCaller {
     const unsubdestinationKey = this.getOption("unsubdestinationKey");
     const unsubdestination = this.option[unsubdestinationKey];
     const unsub = unsubtopic => {
-      this.subscribeTopicMap[unsubtopic] = this.subscribeTopicMap[unsubtopic].filter(
-        _ => {
-          if (_[idKey] === vm[idKey]) {
-            const topicKey = this.getOption("topicKey");
-            requestBody[topicKey] = unsubtopic;
-            const opts = { tokenObj, requestBody };
-            this.send(unsubdestination, opts);
-          }
-          return _[idKey] !== vm[idKey];
+      this.subscribeTopicMap[unsubtopic] = this.subscribeTopicMap[
+        unsubtopic
+      ].filter(_ => {
+        if (_[idKey] === vm[idKey]) {
+          const topicKey = this.getOption("topicKey");
+          requestBody[topicKey] = unsubtopic;
+          const opts = { tokenObj, requestBody };
+          this.send(unsubdestination, opts);
         }
-      );
+        return _[idKey] !== vm[idKey];
+      });
     };
 
     if (Array.isArray(topic)) {
@@ -218,7 +228,6 @@ class socketCaller {
   }
 
   activate() {
-    debugger;
     if (this.client.active === true) {
       console.info("Client is already activated");
       return;

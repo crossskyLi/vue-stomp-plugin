@@ -37,6 +37,7 @@
           this.subscribeTopicMap = {};
           this.client = null;
           this.destination = "subscribe";
+          this.clientStatus = false;
           this.option = option;
           this.makeKeys(option);
       }
@@ -67,9 +68,18 @@
           var destinationKey = this.getOption("destinationKey");
           var destination = this.option[destinationKey];
           this.client.ws.onopen = function () {
+              _this.clientStatus = true;
               _this.send(destination, { tokenObj: tokenObj, requestBody: requestBody });
               _this.onmessage();
           };
+      };
+      socketCaller.prototype.getClientStatus = function () {
+          var _this = this;
+          return new Promise(function (resolve, reject) {
+              setTimeout(function () {
+                  resolve(_this.clientStatus);
+              }, 100);
+          });
       };
       socketCaller.prototype.send = function (destination, opts) {
           if (!this.client) {
@@ -213,7 +223,6 @@
           }
       };
       socketCaller.prototype.activate = function () {
-          debugger;
           if (this.client.active === true) {
               console.info("Client is already activated");
               return;

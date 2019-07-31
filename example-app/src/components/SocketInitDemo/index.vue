@@ -25,6 +25,9 @@ export default class SocketDemo extends Vue {
     // setTimeout(() => {
     //   this.list = new Array(length).fill({ a: Math.random() });
     // }, 10000);
+    // this.init();
+    // this.activate();
+    // this.subscribe();
   }
 
   init() {
@@ -32,7 +35,6 @@ export default class SocketDemo extends Vue {
   }
 
   activate() {
-    debugger;
     client.activate();
   }
 
@@ -58,7 +60,11 @@ export default class SocketDemo extends Vue {
       // topic: "alarm",
       msg: "我来了"
     };
-    client.subscribe(topic, this, callback, hookName, reqBody);
+    client.getClientStatus().then(status => {
+      if (status) {
+        client.subscribe(topic, this, callback, hookName, reqBody);
+      }
+    });
   }
 
   subscribeCallback(msg) {
