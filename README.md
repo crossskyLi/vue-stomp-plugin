@@ -89,7 +89,11 @@ export default {
         // topic: "alarm",
         msg: "我来了"
       };
-      client.subscribe(topic, this, callback, hookName, reqBody);
+      client.getClientStatus().then(status => {
+        if (status) {
+          client.subscribe(topic, this, callback, hookName, reqBody);
+        }
+      });
     }
 
     subscribeCallback(msg) {
