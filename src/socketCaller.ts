@@ -1,5 +1,5 @@
-import factory from "./factory";
-import { hook } from "./hook";
+import factory from './factory';
+import { hook } from './hook';
 interface Option {
   topic?: string;
   subscribeMap: object;
@@ -7,6 +7,7 @@ interface Option {
   tokenObj: any;
   requestBody?: any;
   topicKey: string;
+  topicsKey: string;
   idKey: string;
   tokenKey: string;
   destinationKey: string;
@@ -16,26 +17,33 @@ class socketCaller {
   option: Option;
   subscribeTopicMap = {};
   client = null;
-  destination: string = "subscribe";
+  destination: string = 'subscribe';
   clientStatus: boolean = false;
 
   constructor(option) {
     this.option = option;
+    const { topicNotFoundCallback } = option;
+
+    this.topicNotFoundCallback =
+      topicNotFoundCallback || this.topicNotFoundCallback;
+
     this.makeKeys(option);
   }
   makeKeys(option) {
     const {
       topicKey,
+      topicsKey,
       idKey,
       tokenKey,
       destinationKey,
       unsubdestinationKey
     } = option;
-    this.option.topicKey = topicKey || "topic";
-    this.option.idKey = idKey || "_uid";
-    this.option.tokenKey = tokenKey || "accessToken";
-    this.option.destinationKey = destinationKey || "destination";
-    this.option.unsubdestinationKey = unsubdestinationKey || "unsubdestination";
+    this.option.topicKey = topicKey || 'topic';
+    this.option.topicsKey = topicsKey || 'topics';
+    this.option.idKey = idKey || '_uid';
+    this.option.tokenKey = tokenKey || 'accessToken';
+    this.option.destinationKey = destinationKey || 'destination';
+    this.option.unsubdestinationKey = unsubdestinationKey || 'unsubdestination';
   }
   // 默认激活
   init(activate = true) {
@@ -53,7 +61,7 @@ class socketCaller {
 
   onopen() {
     const { tokenObj, requestBody } = this.option;
-    const destinationKey = this.getOption("destinationKey");
+    const destinationKey = this.getOption('destinationKey');
     const destination = this.option[destinationKey];
 
     this.client.ws.onopen = () => {
@@ -76,7 +84,7 @@ class socketCaller {
       throw new TypeError(`client didn't activated`);
     }
     const { tokenObj, requestBody } = opts;
-    const tokenKey = this.getOption("tokenKey");
+    const tokenKey = this.getOption('tokenKey');
     requestBody[tokenKey] = tokenObj[tokenKey];
 
     this.client.send(destination, tokenObj, JSON.stringify(requestBody));
@@ -86,20 +94,21 @@ class socketCaller {
     this.client.ws.onmessage = event => {
       const resData = JSON.parse(event.data);
       let responseData = resData;
-      const topicKey = this.getOption("topicKey");
+      const topicKey = this.getOption('topicKey');
       try {
         if (resData[topicKey]) {
           responseData[topicKey] = resData[topicKey];
         } else if (resData.data && resData.data[topicKey]) {
           responseData[topicKey] = resData.data[topicKey];
         } else {
-          throw new Error(
+          console.warn(
             `The "${topicKey}" Topic not found in message,please check`
           );
         }
       } catch (error) {
         console.error(error);
         responseData = JSON.parse(event.data);
+        this.topicNotFoundCallback(topicKey, responseData);
       }
 
       // responseData.topic = "alarm"
@@ -113,14 +122,14 @@ class socketCaller {
     };
   }
 
-  subscribe(topic, vm, callback, hookName = "$destroy", requestBody = {}) {
+  subscribe(topic, vm, callback, hookName = '$destroy', requestBody = {}) {
     if (!topic) {
-      throw new Error("topic is required");
+      throw new Error('topic is required');
     }
 
-    const idKey = this.getOption("idKey");
+    const idKey = this.getOption('idKey');
     if (!vm[idKey]) {
-      throw new Error("id is required");
+      throw new Error('id is required');
     }
     const sub = topic => {
       this.subscribeTopicMap[topic] = this.subscribeTopicMap[topic] || [];
@@ -135,12 +144,16 @@ class socketCaller {
         return this.unsubscribe(topic, vm);
       };
 
-      if (vm[hookName] && typeof vm[hookName] === "function") {
+      if (vm[hookName] && typeof vm[hookName] === 'function') {
         hook(vm, hookName, funchook);
       }
     };
 
     if (Array.isArray(topic)) {
+      // if topic is a array send topics
+      const topicsKey = this.getOption('topicsKey');
+      requestBody[topicsKey] = topic;
+
       topic.forEach(t => {
         sub(t);
       });
@@ -148,28 +161,27 @@ class socketCaller {
       sub(topic);
     }
 
-    const destinationKey = this.getOption("destinationKey");
+    const destinationKey = this.getOption('destinationKey');
+    const tokenObj = this.getOption('tokenObj');
+    const topicKey = this.getOption('topicKey');
     const destination = this.option[destinationKey];
-
-    const tokenObj = this.getOption("tokenObj");
-    const topicKey = this.getOption("topicKey");
-
+    
     requestBody[topicKey] = topic;
     const reqBody = { tokenObj, requestBody };
     this.send(destination, reqBody);
   }
 
   unsubscribe(topic, vm, requestBody = {}, callback?) {
-    const idKey = this.getOption("idKey");
-    const tokenObj = this.getOption("tokenObj");
-    const unsubdestinationKey = this.getOption("unsubdestinationKey");
+    const idKey = this.getOption('idKey');
+    const tokenObj = this.getOption('tokenObj');
+    const unsubdestinationKey = this.getOption('unsubdestinationKey');
     const unsubdestination = this.option[unsubdestinationKey];
     const unsub = unsubtopic => {
       this.subscribeTopicMap[unsubtopic] = this.subscribeTopicMap[
         unsubtopic
       ].filter(_ => {
         if (_[idKey] === vm[idKey]) {
-          const topicKey = this.getOption("topicKey");
+          const topicKey = this.getOption('topicKey');
           requestBody[topicKey] = unsubtopic;
           const opts = { tokenObj, requestBody };
           this.send(unsubdestination, opts);
@@ -182,7 +194,7 @@ class socketCaller {
       topic.forEach(unsub);
     }
 
-    if (typeof topic === "string") {
+    if (typeof topic === 'string') {
       if (!this.subscribeTopicMap[topic]) {
         throw new Error(
           `the ${topic} Topic is missed OR Client is destroy, please check the Topic OR the Client is existed`
@@ -198,13 +210,20 @@ class socketCaller {
     return this.option[key];
   }
 
+  topicNotFoundCallback(topicKey, data) {
+    console.warn(
+      `The "${topicKey}" Topic not found in message,please check`,
+      JSON.stringify(data)
+    );
+  }
+
   unsubscribeAll(requestBody = {}, callback?) {
     const { tokenObj } = this.option;
-    const unsubdestinationKey = this.getOption("unsubdestinationKey");
+    const unsubdestinationKey = this.getOption('unsubdestinationKey');
     const unsubdestination = this.option[unsubdestinationKey];
     const topics: string[] = [];
     Object.keys(this.subscribeTopicMap).forEach(topic => {
-      const topicKey = this.getOption("topicKey");
+      const topicKey = this.getOption('topicKey');
       requestBody[topicKey] = topic;
 
       const opts = { tokenObj, requestBody };
@@ -229,7 +248,7 @@ class socketCaller {
 
   activate() {
     if (this.client.active === true) {
-      console.info("Client is already activated");
+      console.info('Client is already activated');
       return;
     }
     this.client.activate();
