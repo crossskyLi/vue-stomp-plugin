@@ -1187,10 +1187,8 @@ json3@^3.3.2:
   resolved "https://registry.npmjs.org/json3/-/json3-3.3.3.tgz#7fc10e375fc5ae42c4705a5cc0aa6f62be305b81"
 
 json5@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/json5/-/json5-2.1.0.tgz#e7a0c62c48285c628d20a10b85c89bb807c32850"
-  dependencies:
-    minimist "^1.2.0"
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
 
 lodash@^4.17.11, lodash@^4.17.4:
   version "4.17.15"
@@ -1207,10 +1205,6 @@ magic-string@^0.25.2:
   resolved "https://registry.npmjs.org/magic-string/-/magic-string-0.25.3.tgz#34b8d2a2c7fec9d9bdf9929a3fd81d271ef35be9"
   dependencies:
     sourcemap-codec "^1.4.4"
-
-minimist@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
 ms@2.0.0:
   version "2.0.0"
